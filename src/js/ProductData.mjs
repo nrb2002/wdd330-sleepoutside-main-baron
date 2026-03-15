@@ -5,7 +5,7 @@ function convertToJson(res) {
     throw new Error("Bad Response");
   }
 }
-
+//Make it available to the rest of the app
 export default class ProductData {
   constructor(category) {
     this.category = category;
