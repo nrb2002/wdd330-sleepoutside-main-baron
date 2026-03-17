@@ -2,38 +2,42 @@
 
 export default class ProductList {
     /**
-     * @param {string} category - The category of products to display
-     * @param {object} dataSource - The object that provides product data
-     * @param {HTMLElement} listElement - The HTML element (<ul>) where products will be rendered
+     * @param {string} category - Product category
+     * @param {object} dataSource - Object providing product data (e.g., ProductData instance)
+     * @param {HTMLElement} listElement - HTML <ul> element to render products into
      */
     constructor(category, dataSource, listElement) {
-        this.category = category;       // category of products
-        this.dataSource = dataSource;   // ProductData instance
-        this.listElement = listElement; // HTML container (<ul>)
+        this.category = category;
+        this.dataSource = dataSource;
+        this.listElement = listElement;
+        this.products = []; // will store fetched products
     }
 
     /**
-     * Render products in the listElement
+     * Initialize the product list by fetching data and rendering
+     */
+    async init() {
+        try {
+            // Fetch products for this category
+            this.products = await this.dataSource.getProducts(this.category);
+            this.render(); // render after data is fetched
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    }
+
+    /**
+     * Render the products in the listElement
      */
     render() {
-        // Clear the container
+        if (!this.listElement) return;
+
+        // Clear the container first
         this.listElement.innerHTML = '';
 
-        // Get products for this category from the data source
-        let products = [];
-
-        // If category is 'all', get all products
-        if (this.category === 'all') {
-            products = this.dataSource.getProducts();
-        } else {
-            // Otherwise, filter by category
-            products = this.dataSource.getProducts(this.category);
-        }
-
-        // Loop through each product and generate HTML
-        products.forEach(product => {
+        // Loop through products and generate HTML
+        this.products.forEach(product => {
             const isDiscounted = product.FinalPrice < product.SuggestedRetailPrice;
-
             const productHTML = `
         <li class="product-card">
           <img src="${product.image}" alt="${product.name}" />
@@ -45,7 +49,6 @@ export default class ProductList {
           </p>
         </li>
       `;
-
             this.listElement.innerHTML += productHTML;
         });
     }
